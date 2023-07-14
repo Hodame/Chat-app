@@ -1,0 +1,38 @@
+[
+  {
+    "id": 1,
+    "avatarLink": "https://distribution.faceit-cdn.net/images/8e6c0835-3dc5-4ce2-8421-4e07854fd71d.jpeg",
+    "userName": "Mister Proper",
+    "lastMessage": "i will fuck you asshole",
+    "messageTime": "10:43pm",
+    "isRead": false,
+    "messageCount": 10
+  },
+  {
+    "id": 2,
+    "avatarLink": "https://ru-static.z-dn.net/files/d31/bb138cdc975f2153aa1f12e3752a9bea.jpg",
+    "userName": "Barak Omaba",
+    "lastMessage": "Nice joke! very funny",
+    "messageTime": "4:25pm",
+    "isRead": false,
+    "messageCount": 1
+  },
+  {
+    "id": 3,
+    "avatarLink": "https://papik.pro/en/uploads/posts/2022-06/1655712245_10-papik-pro-p-cool-profile-picture-avatars-10.jpg",
+    "userName": "My best friend",
+    "lastMessage": "where are you goddam idiot",
+    "messageTime": "3:43am",
+    "isRead": false,
+    "messageCount": 23
+  },
+  {
+    "id": 4,
+    "avatarLink": "https://papik.pro/en/uploads/posts/2022-06/1655712241_5-papik-pro-p-cool-profile-picture-avatars-5.jpg",
+    "userName": "Father.",
+    "lastMessage": "i and your mother divorced",
+    "messageTime": "1:43am",
+    "isRead": false,
+    "messageCount": 2
+  }
+]
