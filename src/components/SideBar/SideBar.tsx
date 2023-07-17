@@ -1,26 +1,17 @@
 import { Button } from '@chakra-ui/react';
 import { HiCog } from 'react-icons/hi';
 import { Link, useLocation } from 'react-router-dom';
-import { ChangeEvent, useState } from 'react';
-import SearchBar from './SearchBar';
-import ChatTile from '../ChatPage/ChatTile';
-import ChatTiles from '../../data/chatTiles.json';
+import { useState } from 'react';
+
+import SearchBar from '@/components/SideBar/SearchBar';
+import ChatTile from '@/components/ChatPage/ChatTile';
 
 export default function SideBar() {
-  const [chats, setChats] = useState(ChatTiles);
   const location = useLocation();
 
-  function searchForChat(e: ChangeEvent<HTMLInputElement>) {
-    setChats((chats) =>
-      chats.filter((chat) =>
-        chat.userName.toLowerCase().includes(e.target.value)
-      )
-    );
+  const [chats, setChats] = useState(null);
 
-    if (e.target.value.length < 1) setChats(ChatTiles);
-  }
-
-  return (
+   return (
     <div className="flex w-full flex-col h-full mr-2 overflow-auto bg-background">
       <div className="px-4 pt-4">
         <div className="my-4 px-4 flex items-center gap-2">
@@ -37,13 +28,13 @@ export default function SideBar() {
           <div className="flex-auto">
             {SearchBar({
               hintText: 'Search for dialog',
-              onSearch: searchForChat
+              onSearch: () => {}
             })}
           </div>
         </div>
       </div>
       <div className="mx-3">
-        {chats.map((chat, idx) => (
+        {/* {chats.map((chat, idx) => (
           <Link
             key={idx}
             replace={location.pathname !== '/'}
@@ -57,7 +48,7 @@ export default function SideBar() {
               lastMessage={chat.lastMessage}
             />
           </Link>
-        ))}
+        ))} */}
       </div>
     </div>
   );

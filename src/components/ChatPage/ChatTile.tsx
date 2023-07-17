@@ -25,7 +25,7 @@ export default function ChatTile({ avatarLink, userName, lastMessage, messageTim
       </div>
       <div className="flex flex-col text-sm items-end">
         <h1 className={"text-sm text-light"}>{messageTime}</h1>
-        {MessageCount({ count: messageCount })}
+        <MessageCount count={messageCount}/>
       </div>
     </div>
   );
