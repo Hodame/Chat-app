@@ -1,24 +1,18 @@
-import { Navigate, RouteObject } from "react-router-dom";
+import { BrowserRouter, Route, Routes } from "react-router-dom"
 
 import Main from "@/containers/Main"
 import Auth from "@/containers/Auth.tsx"
-import Chat from "@/containers/Chat.tsx"
+import Chat from "@/containers/Chat"
 
-const routes = (isLoggedIn?: boolean): RouteObject[] => [
-  {
-    path: "/",
-    element: isLoggedIn ? <Main /> : <Navigate to="/auth" />,
-    children: [
-      {
-        path: "/:chatID",
-        element: <Chat />,
-      },
-    ],
-  },
-  {
-    path: "/auth",
-    element: !isLoggedIn ? <Auth/> : <Navigate to="/" />,
-  },
-]
+const RoutesRouter = () => (
+  <BrowserRouter>
+    <Routes>
+      <Route path="/auth" element={<Auth />} />
+      <Route path="/" element={<Main />}>
+        <Route path="/:chatID" element={<Chat />} />
+      </Route>
+    </Routes>
+  </BrowserRouter>
+)
 
-export default routes
+export default RoutesRouter
