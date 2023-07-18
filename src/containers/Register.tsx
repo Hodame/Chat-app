@@ -6,12 +6,15 @@ import { auth, db } from "@/firebase/config"
 import { set, ref as fireRef } from "firebase/database"
 
 import CustomInput from "../components/UI/CustomInput"
+import { useNavigate } from "react-router-dom"
 
 type RegisterProps = {
   goLogin: MouseEventHandler<HTMLButtonElement>
 }
 
 export default function Register({ goLogin }: RegisterProps) {
+  const navigate = useNavigate()
+
   const [isLoading, setLoading] = useState(false)
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
@@ -23,6 +26,7 @@ export default function Register({ goLogin }: RegisterProps) {
       await createUserWithEmailAndPassword(auth, email, password).then((user) =>
         writeUserData(user.user.uid, user.user.email!, username, user.user.photoURL)
       )
+      navigate("/")
     } catch (error) {
       alert(error)
     } finally {
