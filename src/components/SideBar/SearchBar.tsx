@@ -4,7 +4,7 @@ import { HiSearch } from "react-icons/hi"
 
 type SearchBarProps = {
   hintText?: string
-  onSearch?: ChangeEventHandler
+  onSearch?: ChangeEventHandler<HTMLInputElement>
 }
 
 export default function SearchBar({ hintText, onSearch }: SearchBarProps) {
