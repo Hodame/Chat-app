@@ -7,46 +7,82 @@ import { MouseEventHandler, useEffect, useRef, useState } from "react"
 import MessageLine from "@/components/ChatPage/MessageLine"
 import SeachTab from "@/components/ChatPage/SearchTab"
 import ResizeTextArea from "@/components/UI/ResizeTextArea"
+import { collection, doc, getDoc, getDocs, query, where } from "firebase/firestore"
+import { db } from "@/firebase/config"
+import useUserStore, { User } from "@/store/userStore"
 
 type Messages = {
-  body: string
-  user: {
-    username: string
-  }
-  fromUser?: boolean
+  sentAt: string
+  sentBy: string
+  message: string
 }[]
+
+type Chat = {
+  createdAt: string
+  id: string
+  members: string[]
+  recentMessage: {
+    message: string
+    isRead: boolean
+    sentAt: string
+    sentBy: string
+  }
+  type: "private" | "group"
+}
 
 export default function Chat() {
   const location = useLocation()
+  const messagesRef = useRef<HTMLDivElement | null>(null)
+  const user = useUserStore((state) => state.user)
   const { chatID } = useParams()
 
-  const messagesRef = useRef<HTMLDivElement | null>(null)
-
-  const [messages, setMessages] = useState<Messages>([{ body: "", user: { username: "" } }])
+  const [chat, setChat] = useState<User | null>(null)
+  const [messages, setMessages] = useState<Messages | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [isSearchBar, setSearchBar] = useState(false)
 
-  async function fetchMessages() {
-    const response = await fetch("https://dummyjson.com/comments")
-    const data: { comments: { body: string; user: { username: string } }[] } = await response.json()
-
-    setMessages(data.comments)
-    setIsLoading(false)
-    setTimeout(() => {
-      messagesRef.current?.scrollIntoView({
-        block: "end",
-        behavior: "instant",
+  async function getChatInfo() {
+    try {
+      await getDoc(doc(db, "users", chatID!)).then((doc) => {
+        if (doc.exists()) {
+          const data = doc.data() as User
+          setChat(data)
+        }
       })
-    }, 1)
+    } catch (error) {}
+  }
+
+  async function getChat() {
+    try {
+    } catch (error) {
+      alert(error)
+    }
+  }
+
+  async function getChatMessages() {
+    try {
+    } catch (error) {
+      alert(error)
+    }
   }
 
   function sendMessage() {
+    if (messages) {
+      setMessages([
+        ...messages,
+        {
+          message: "ff",
+          sentBy: "s",
+          sentAt: "f",
+        },
+      ])
+    } else {
+    }
     setMessages([
-      ...messages,
       {
-        body: "ff",
-        user: { username: "hodame" },
-        fromUser: true,
+        message: "ff",
+        sentBy: "",
+        sentAt: "",
       },
     ])
     setTimeout(() => {
@@ -56,7 +92,10 @@ export default function Chat() {
 
   useEffect(
     function () {
-      fetchMessages()
+      getChatInfo()
+      getChat()
+      getChatMessages()
+      setIsLoading(false)
       return () => {
         setIsLoading(true), setSearchBar(false)
       }
@@ -68,7 +107,9 @@ export default function Chat() {
     <div className={"grid " + (isSearchBar ? "grid-cols-[1fr,0.5fr]" : "grid-cols-[1fr]")}>
       <div className={"flex flex-col h-screen bg-background " + (isSearchBar ? "rounded-tr-3xl rounded-br-3xl" : null)}>
         <div className="flex">
-          {/* <UserChatInfo avatar={chat?.avatarLink} name={chat?.userName} searchEvent={() => setSearchBar(true)} /> */}
+          {chat ? (
+            <UserChatInfo avatar={chat?.photoURL} name={chat.username} searchEvent={() => setSearchBar(true)} />
+          ) : null}
         </div>
         <div className="flex flex-col overflow-auto h-full">
           <div className="flex-auto px-6 max-w-4xl m-auto w-full">
@@ -76,18 +117,22 @@ export default function Chat() {
               <div className="h-full flex items-center justify-center">
                 <Spinner size={"xl"} />
               </div>
-            ) : (
+            ) : messages ? (
               <div ref={messagesRef}>
                 {messages.map((message, idx) => (
                   <MessageLine
                     key={idx}
-                    message={message.body}
-                    userName={message.user.username}
-                    fromUser={message.fromUser}
-                    timeSend="10:30pm"
+                    message={message.message}
+                    userName={message.sentBy}
+                    fromUser={false}
+                    timeSend={message.sentAt}
                   />
                 ))}
                 <span></span>
+              </div>
+            ) : (
+              <div className="screen-center">
+                <h1 className="font-semibold">Say hello to {chat?.username}</h1>
               </div>
             )}
           </div>
@@ -104,7 +149,7 @@ export default function Chat() {
 }
 
 type UserChatInfoProsp = {
-  avatar?: string
+  avatar?: string | null
   name?: string
   searchEvent: MouseEventHandler<HTMLButtonElement>
 }
@@ -113,7 +158,7 @@ function UserChatInfo({ avatar, name, searchEvent }: UserChatInfoProsp) {
   return (
     <div className="flex items-center p-3 justify-between w-full">
       <div className="flex items-center">
-        <Avatar className="mr-3" name={name} src={avatar}>
+        <Avatar className="mr-3" name={name} src={avatar ?? undefined}>
           <AvatarBadge boxSize="1.0em" bg="green.500" />
         </Avatar>
         <div>
