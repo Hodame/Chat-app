@@ -2,10 +2,11 @@ import TimeAgo from 'timeago-react';
 
 import { Avatar } from "@chakra-ui/react"
 
-type UserTileProps = {
+export type UserTileProps = {
   photoURL: string
   username: string
   lastOnline: string
+  userID?: string
 }
 
 export default function UserTile({ photoURL, username, lastOnline }: UserTileProps) {
