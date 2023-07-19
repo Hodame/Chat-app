@@ -128,3 +128,7 @@ h6 {
 textarea, input {
   @apply focus:ring-2 ring-primary focus:bg-surface
 }
+
+.screen-center {
+  @apply h-full flex items-center justify-center
+}
