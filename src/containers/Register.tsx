@@ -3,7 +3,7 @@ import { HiLockClosed, HiMail, HiUser } from "react-icons/hi"
 import { MouseEventHandler, useState } from "react"
 import { createUserWithEmailAndPassword } from "firebase/auth"
 import { auth, db } from "@/firebase/config"
-import { set, ref as fireRef } from "firebase/database"
+import { doc, setDoc } from "firebase/firestore"
 
 import CustomInput from "../components/UI/CustomInput"
 import { useNavigate } from "react-router-dom"
@@ -35,7 +35,7 @@ export default function Register({ goLogin }: RegisterProps) {
   }
 
   async function writeUserData(userID: string, email: string, username: string, photoURL: string | null) {
-    set(fireRef(db, "users/" + userID), {
+    setDoc(doc(db, "users", userID), {
       userID: userID,
       email: email,
       username: username,
