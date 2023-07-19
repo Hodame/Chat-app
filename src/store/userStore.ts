@@ -6,7 +6,6 @@ export type User = {
   userID: string
   photoURL: string | null
   chats: string[] | null
-
 }
 
 type UserState = {
@@ -22,7 +21,7 @@ const useUserStore = create<UserState>()((set) => ({
     photoURL: null,
     chats: null
   },
-  writeUser: (user) => set(_state => ({ user: user }))
+  writeUser: (user) => set(() => ({ user: user }))
 }))
 
 export default useUserStore
