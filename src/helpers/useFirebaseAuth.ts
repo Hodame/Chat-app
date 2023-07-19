@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react"
 import { onAuthStateChanged } from "firebase/auth"
 import { auth, db } from "@/firebase/config"
+import { doc, getDoc } from "firebase/firestore";
 import useUserStore, { User } from "@/store/userStore";
-import { child, get, ref } from "firebase/database";
 
 export const useAuthListener = () => {
   const [isLoggedIn, setLoggedIn] = useState(false);
@@ -14,9 +14,9 @@ export const useAuthListener = () => {
   useEffect(() => {
     const getUser = async () => {
       try {
-        await get(child(ref(db), 'users/' + userId)).then((user) => {
+        await getDoc(doc(db, 'users', userId!)).then((user) => {
           if (user.exists()) {
-            const userData = user.val() as User
+            const userData = user.data() as User
             writeUser(userData)
             return
           }
@@ -48,7 +48,7 @@ export const useAuthListener = () => {
   }, [userId])
 
   useEffect(() => {
-    onAuthStateChanged(auth, (user) => {
+    onAuthStateChanged(auth, async (user) => {
       if (user) {
         setLoggedIn(true)
         setUserId(user.uid)
