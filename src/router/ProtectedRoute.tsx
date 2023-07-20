@@ -2,8 +2,22 @@ import { useAuthListener } from "@/helpers/useFirebaseAuth"
 import { Spinner } from "@chakra-ui/react"
 import { Navigate } from "react-router-dom"
 
-export default function ProtectedRoute({ Childer }: { Childer: JSX.Element }) {
-  const { isLoggedIn, isCheckingStatus } = useAuthListener()
+const ProtectedRoute = ({ children }: { children: JSX.Element }) => {
+  const { isCheckingStatus, isLoggedIn } = useAuthListener()
 
-  return <>{isCheckingStatus ? <Spinner size={"xl"} /> : isLoggedIn ? { Childer } : <Navigate to={"auth"} />}</>
+  return (
+    <>
+      {isCheckingStatus ? (
+        <div className="screen-center">
+          <Spinner size={"xl"} />
+        </div>
+      ) : isLoggedIn ? (
+        <>{children}</>
+      ) : (
+        <Navigate to={"/auth"} />
+      )}
+    </>
+  )
 }
+
+export default ProtectedRoute
