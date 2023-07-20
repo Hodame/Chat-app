@@ -5,7 +5,6 @@ export type User = {
   email: string
   userID: string
   photoURL: string | null
-  chats: string[] | null
 }
 
 type UserState = {
