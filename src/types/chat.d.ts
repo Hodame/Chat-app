@@ -1,9 +1,23 @@
-type ChatTile = {
+import { Timestamp } from "firebase/firestore"
+
+type ChatTileType = {
+  photoURL: string,
+  username: string,
   chatID: string,
-  photoURL: string;
-  username: string;
-  lastMessage: string;
-  messageTime: string;
-  isRead?: boolean;
-  messageCount: number
+  message: string,
+  sentAt: Timestamp,
+  sentBy: {
+    username: string
+    userID: string
+  }
+}
+
+type Message = {
+  sentAt: Timestamp
+  sentBy: {
+    username: string
+    photoURL: string
+    userID: string
+  }
+  message: string
 }
