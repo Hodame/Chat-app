@@ -1,10 +1,11 @@
 import { useState } from "react"
 
-import Login from "./Login"
-import Register from "./Register"
 import { useAuthListener } from "@/helpers/useFirebaseAuth"
 import { Spinner } from "@chakra-ui/react"
 import { Navigate } from "react-router-dom"
+
+import Login from "./Login"
+import Register from "./Register"
 
 export default function Auth() {
   const { isLoggedIn, isCheckingStatus } = useAuthListener()
