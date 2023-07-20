@@ -1,7 +1,7 @@
 import { Button } from "@chakra-ui/react"
 import { HiArrowSmLeft, HiCog } from "react-icons/hi"
-import { Link } from "react-router-dom"
-import { useEffect, useState } from "react"
+import { Link, useLocation } from "react-router-dom"
+import { MouseEventHandler, useEffect, useState } from "react"
 
 import SearchBar from "@/components/SideBar/SearchBar"
 import ChatTile from "@/components/ChatPage/ChatTile"
@@ -11,21 +11,22 @@ import SideBarSelect from "./SideBarSelect"
 import useUserStore from "@/store/userStore"
 import UserTile, { UserTileProps } from "./UserTile"
 import { collection, getDocs, onSnapshot, query, where } from "firebase/firestore"
+import { ChatTileType } from "@/types/chat"
 
 export default function SideBar() {
   const user = useUserStore((state) => state.user)
 
   const [isSearch, setIsSearch] = useState(false)
   const [searchWord, setSearchWord] = useState("")
-  const [chats, setChats] = useState<ChatTile[] | null>(null)
+  const [chats, setChats] = useState<ChatTileType[] | null>(null)
   const [searchResult, setSearchResult] = useState<UserTileProps[] | null>(null)
 
   async function getUserChats() {
     try {
-      const chatQuery = query(collection(db, "chats"), where("members", "array-contains", user.userID))
-      await onSnapshot(chatQuery, (snapshot) => {
+      const chatQuery = query(collection(db, "chats", user.userID, "chat"))
+      onSnapshot(chatQuery, (snapshot) => {
+        const data = snapshot.docs.map((doc) => doc.data()) as ChatTileType[]
         if (!snapshot.empty) {
-          const data = snapshot.docs.map((doc) => doc.data()) as ChatTile[]
           setChats(data)
         }
       })
@@ -42,7 +43,6 @@ export default function SideBar() {
         const userQuery = query(collection(db, "users"), where("username", "==", searchWord))
         await getDocs(userQuery).then((result) => {
           const data = result.docs.map((doc) => doc.data()) as UserTileProps[]
-          console.log(searchWord)
           if (!result.empty) {
             setSearchResult(data)
           }
@@ -76,11 +76,9 @@ export default function SideBar() {
           ) : (
             <SideBarSelect
               button={
-                <Button h={"56px"} w={"56px"} rounded={"3xl"}>
-                  <div className="text-3xl text-white">
-                    <HiCog />
-                  </div>
-                </Button>
+                <div className="text-3xl text-white">
+                  <HiCog />
+                </div>
               }
             />
           )}
@@ -94,17 +92,9 @@ export default function SideBar() {
           </div>
         </div>
         {isSearch ? (
-          <SearchList users={searchResult} />
-        ) : user.chats ? (
-          chats ? (
-            <ChatList chats={chats} />
-          ) : (
-            <>
-              <div className="screen-center">
-                <h1 className="font-semibold">Somethins went wrong...</h1>
-              </div>
-            </>
-          )
+          <SearchList onClickTile={toggleSearchBar} users={searchResult} />
+        ) : chats ? (
+          <ChatList chats={chats} />
         ) : (
           <>
             <div className="screen-center">
@@ -117,22 +107,18 @@ export default function SideBar() {
   )
 }
 
-type ChatListProps = {
-  chats: ChatTile[]
-}
-
-function ChatList({ chats }: ChatListProps) {
+function ChatList({ chats }: { chats: ChatTileType[] }) {
   return (
     <div className="mx-3">
       {chats.map((chat, idx) => (
         <Link key={idx} replace={location.pathname !== "/"} to={`/` + chat.chatID}>
           <ChatTile
-            username={chat.username}
             photoURL={chat.photoURL}
-            messageCount={chat.messageCount}
-            messageTime={chat.messageTime}
-            lastMessage={chat.lastMessage}
-            chatID={""}
+            username={chat.username}
+            chatID=""
+            message={chat.message}
+            sentAt={chat.sentAt}
+            sentBy={chat.sentBy}
           />
         </Link>
       ))}
@@ -140,14 +126,21 @@ function ChatList({ chats }: ChatListProps) {
   )
 }
 
-function SearchList({ users }: { users: UserTileProps[] | null }) {
+function SearchList({
+  users,
+  onClickTile,
+}: {
+  users: UserTileProps[] | null
+  onClickTile: MouseEventHandler<HTMLAnchorElement>
+}) {
+  const location = useLocation()
   return (
     <>
       {users ? (
         <div>
-          {users.map((user) => {
+          {users.map((user, idx) => {
             return (
-              <Link to={"/" + user.userID}>
+              <Link key={idx} onClick={onClickTile} replace={location.pathname !== "/"} to={"/" + user.userID}>
                 <UserTile lastOnline={"December 17, 1995 03:24:00"} photoURL={user.photoURL} username={user.username} />
               </Link>
             )
