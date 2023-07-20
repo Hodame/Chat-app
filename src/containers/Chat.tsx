@@ -1,47 +1,31 @@
-import { Avatar, AvatarBadge, Button, Spinner } from "@chakra-ui/react"
+import { Spinner } from "@chakra-ui/react"
 import { useLocation, useParams } from "react-router-dom"
-import { HiPaperAirplane, HiPaperClip } from "react-icons/hi"
-import { HiDotsHorizontal, HiSearch } from "react-icons/hi"
-import { MouseEventHandler, useEffect, useRef, useState } from "react"
-
-import MessageLine from "@/components/ChatPage/MessageLine"
-import SeachTab from "@/components/ChatPage/SearchTab"
-import ResizeTextArea from "@/components/UI/ResizeTextArea"
-import { collection, doc, getDoc, getDocs, query, where } from "firebase/firestore"
+import { useEffect, useRef, useState } from "react"
+import { collection, doc, getDoc, onSnapshot } from "firebase/firestore"
+import { Message } from "@/types/chat"
 import { db } from "@/firebase/config"
 import useUserStore, { User } from "@/store/userStore"
 
-type Messages = {
-  sentAt: string
-  sentBy: string
-  message: string
-}[]
-
-type Chat = {
-  createdAt: string
-  id: string
-  members: string[]
-  recentMessage: {
-    message: string
-    isRead: boolean
-    sentAt: string
-    sentBy: string
-  }
-  type: "private" | "group"
-}
+// либо говно без типов но зато подходит
+//@ts-ignore
+import dateFormat from "dateformat"
+import SearchTab from "@/components/ChatPage/SearchTab"
+import UserChatInfo from "@/components/ChatPage/UserChatInfo"
+import MessagesList from "@/components/ChatPage/MessagesList"
+import ChatInput from "@/components/ChatPage/ChatInput"
 
 export default function Chat() {
   const location = useLocation()
-  const messagesRef = useRef<HTMLDivElement | null>(null)
+  const messagesRef = useRef<HTMLDivElement>()
   const user = useUserStore((state) => state.user)
   const { chatID } = useParams()
 
-  const [chat, setChat] = useState<User | null>(null)
-  const [messages, setMessages] = useState<Messages | null>(null)
+  const [reciver, setChat] = useState<User | null>(null)
+  const [messages, setMessages] = useState<Message[] | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [isSearchBar, setSearchBar] = useState(false)
 
-  async function getChatInfo() {
+  async function getReciverInfo() {
     try {
       await getDoc(doc(db, "users", chatID!)).then((doc) => {
         if (doc.exists()) {
@@ -49,53 +33,33 @@ export default function Chat() {
           setChat(data)
         }
       })
-    } catch (error) {}
-  }
-
-  async function getChat() {
-    try {
     } catch (error) {
-      alert(error)
+      console.log(error)
     }
   }
 
-  async function getChatMessages() {
+  async function getMessages() {
     try {
+      const chatRef = collection(db, "chats", user.userID, "message", chatID!, "messages")
+      onSnapshot(chatRef, (snapshot) => {
+        if (!snapshot.empty) {
+          const data = snapshot.docs.map((doc) => doc.data()) as Message[]
+          const sorted = data.sort((message, message2) => message.sentAt.seconds - message2.sentAt.seconds)
+          setMessages(sorted)
+        }
+      })
     } catch (error) {
-      alert(error)
+      console.log(error)
     }
-  }
-
-  function sendMessage() {
-    if (messages) {
-      setMessages([
-        ...messages,
-        {
-          message: "ff",
-          sentBy: "s",
-          sentAt: "f",
-        },
-      ])
-    } else {
-    }
-    setMessages([
-      {
-        message: "ff",
-        sentBy: "",
-        sentAt: "",
-      },
-    ])
-    setTimeout(() => {
-      messagesRef.current?.scrollIntoView({ block: "end", behavior: "smooth" })
-    }, 1)
   }
 
   useEffect(
     function () {
-      getChatInfo()
-      getChat()
-      getChatMessages()
-      setIsLoading(false)
+      const wait = async () => {
+        await Promise.all([getReciverInfo(), getMessages()])
+        setIsLoading(false)
+      }
+      wait()
       return () => {
         setIsLoading(true), setSearchBar(false)
       }
@@ -105,102 +69,33 @@ export default function Chat() {
 
   return (
     <div className={"grid " + (isSearchBar ? "grid-cols-[1fr,0.5fr]" : "grid-cols-[1fr]")}>
-      <div className={"flex flex-col h-screen bg-background " + (isSearchBar ? "rounded-tr-3xl rounded-br-3xl" : null)}>
-        <div className="flex">
-          {chat ? (
-            <UserChatInfo avatar={chat?.photoURL} name={chat.username} searchEvent={() => setSearchBar(true)} />
-          ) : null}
-        </div>
-        <div className="flex flex-col overflow-auto h-full">
-          <div className="flex-auto px-6 max-w-4xl m-auto w-full">
-            {isLoading ? (
-              <div className="h-full flex items-center justify-center">
-                <Spinner size={"xl"} />
-              </div>
-            ) : messages ? (
-              <div ref={messagesRef}>
-                {messages.map((message, idx) => (
-                  <MessageLine
-                    key={idx}
-                    message={message.message}
-                    userName={message.sentBy}
-                    fromUser={false}
-                    timeSend={message.sentAt}
-                  />
-                ))}
-                <span></span>
-              </div>
-            ) : (
-              <div className="screen-center">
-                <h1 className="font-semibold">Say hello to {chat?.username}</h1>
-              </div>
-            )}
+      {isLoading ? (
+        <div className="h-screen">
+          <div className="screen-center bg-background">
+            <Spinner size={"xl"} />
           </div>
         </div>
-        <div>
-          <ChatInput sendMessage={sendMessage} />
+      ) : (
+        <div
+          className={"flex flex-col h-screen bg-background " + (isSearchBar ? "rounded-tr-3xl rounded-br-3xl" : null)}
+        >
+          <div className="flex">
+            {reciver ? (
+              <UserChatInfo avatar={reciver?.photoURL} name={reciver.username} searchEvent={() => setSearchBar(true)} />
+            ) : null}
+          </div>
+          <div className="flex flex-col overflow-auto h-full">
+            <div className="flex-auto px-6 max-w-4xl m-auto w-full">
+              <MessagesList ref={messagesRef} messages={messages} reciver={reciver} />
+            </div>
+          </div>
+          <div>
+            <ChatInput messagesRef={messagesRef} reciver={reciver} />
+          </div>
         </div>
-      </div>
+      )}
       <div className={isSearchBar ? "" : "translate-x-full hidden"}>
-        <SeachTab closeSearchBar={() => setSearchBar(false)} />
-      </div>
-    </div>
-  )
-}
-
-type UserChatInfoProsp = {
-  avatar?: string | null
-  name?: string
-  searchEvent: MouseEventHandler<HTMLButtonElement>
-}
-
-function UserChatInfo({ avatar, name, searchEvent }: UserChatInfoProsp) {
-  return (
-    <div className="flex items-center p-3 justify-between w-full">
-      <div className="flex items-center">
-        <Avatar className="mr-3" name={name} src={avatar ?? undefined}>
-          <AvatarBadge boxSize="1.0em" bg="green.500" />
-        </Avatar>
-        <div>
-          <h1 className="text-lg font-semibold">{name}</h1>
-          <p className="text-primary">Online</p>
-        </div>
-      </div>
-      <div className="flex gap-2">
-        <div>
-          <Button rounded={"3xl"} onClick={searchEvent} variant="ghost">
-            <HiSearch />
-          </Button>
-        </div>
-        <div>
-          <Button rounded={"3xl"} variant="ghost">
-            <HiDotsHorizontal />
-          </Button>
-        </div>
-      </div>
-    </div>
-  )
-}
-
-type ChatInputProps = {
-  sendMessage: MouseEventHandler<HTMLButtonElement>
-}
-
-function ChatInput({ sendMessage }: ChatInputProps) {
-  return (
-    <div className="flex items-end gap-2 p-5 max-w-4xl m-auto w-full">
-      <div className={"relative flex items-end rounded-3xl hover:bg-surface ease-linear w-full focus:bg-surface"}>
-        <div className="absolute h-[42px] left-6 top[50%] -translate-x-[50%]">
-          <Button h={"inherit"} rounded={"3xl"} variant={"ghost"}>
-            <HiPaperClip />
-          </Button>
-        </div>
-        <ResizeTextArea placeholder="Write a message..." />
-      </div>
-      <div className="rotate-90 h-full">
-        <Button onClick={sendMessage} h={12} w={"100%"} rounded={"3xl"} variant={"solid"}>
-          <HiPaperAirplane />
-        </Button>
+        <SearchTab closeSearchBar={() => setSearchBar(false)} />
       </div>
     </div>
   )
