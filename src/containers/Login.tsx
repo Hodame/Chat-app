@@ -11,7 +11,7 @@ type LoginProps = {
   goRegister: MouseEventHandler<HTMLButtonElement>
 }
 
-export default function Login({ goRegister }: LoginProps) {
+export default function Login() {
   const navigate = useNavigate()
 
   const [isLoading, setLoading] = useState(false)
@@ -43,11 +43,6 @@ export default function Login({ goRegister }: LoginProps) {
         />
         <Button onClick={login} isLoading={isLoading} size={"lg"}>
           <p>Login now!</p>
-        </Button>
-      </div>
-      <div className="mt-3 flex justify-center">
-        <Button onClick={goRegister} rounded={"full"} variant={"ghost"}>
-          <p>Register</p>
         </Button>
       </div>
     </div>
