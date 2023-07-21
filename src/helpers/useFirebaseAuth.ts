@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { onAuthStateChanged } from "firebase/auth"
 import { auth, db } from "@/firebase/config"
 import { doc, getDoc } from "firebase/firestore";
@@ -44,15 +44,17 @@ export const useAuthListener = () => {
     })
   }
 
-  onAuthStateChanged(auth, async (user) => {
-    if (user) {
-      await writeUserToDatabase(user.uid)
-      setLoggedIn(true)
+  useEffect(() => {
+    onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        await writeUserToDatabase(user.uid)
+        setLoggedIn(true)
+        setCheckingStatus(false);
+        return
+      }
       setCheckingStatus(false);
-      return
-    }
-    setCheckingStatus(false);
-  });
+    });
+  }, [])
 
   return { isLoggedIn, isCheckingStatus };
 };
