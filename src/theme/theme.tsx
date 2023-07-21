@@ -47,7 +47,7 @@ const components = {
       item: {
         fontSize: '1.1rem',
         bg: 'transparent',
-        borderRadius: 'xl',
+        borderRadius: '3xl',
         fontWeight: '600',
         _hover: {
           bg: 'surface',
@@ -55,7 +55,7 @@ const components = {
       },
       list: {
         borderRadius: '3xl',
-        p: '4',
+        p: '2',
         bg: 'backgroundBlur',
         backdropFilter: 'blur(5px)',
       },
