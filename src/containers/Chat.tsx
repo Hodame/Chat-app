@@ -16,7 +16,7 @@ import ChatInput from "@/components/ChatPage/ChatInput"
 
 export default function Chat() {
   const location = useLocation()
-  const messagesRef = useRef<HTMLDivElement>()
+  const messagesRef = useRef<HTMLDivElement | null>(null)
   const user = useUserStore((state) => state.user)
   const { chatID } = useParams()
 
@@ -58,6 +58,9 @@ export default function Chat() {
       const wait = async () => {
         await Promise.all([getReciverInfo(), getMessages()])
         setIsLoading(false)
+        setTimeout(() => {
+          messagesRef.current?.scrollIntoView({ behavior: "instant", block: "end" })
+        }, 1)
       }
       wait()
       return () => {
