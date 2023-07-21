@@ -1,17 +1,17 @@
-import { Button } from "@chakra-ui/react"
+import { Button, Spinner } from "@chakra-ui/react"
 import { HiArrowSmLeft, HiCog } from "react-icons/hi"
 import { Link, useLocation } from "react-router-dom"
 import { MouseEventHandler, useEffect, useState } from "react"
+import { collection, getDocs, onSnapshot, query, where } from "firebase/firestore"
+import { ChatTileType } from "@/types/chat"
+import { db } from "@/firebase/config"
 
 import SearchBar from "@/components/SideBar/SearchBar"
 import ChatTile from "@/components/ChatPage/ChatTile"
-import { db } from "@/firebase/config"
-
 import SideBarSelect from "./SideBarSelect"
 import useUserStore from "@/store/userStore"
 import UserTile, { UserTileProps } from "./UserTile"
-import { collection, getDocs, onSnapshot, query, where } from "firebase/firestore"
-import { ChatTileType } from "@/types/chat"
+import useDebounce from "@/helpers/userDebounce"
 
 export default function SideBar() {
   const user = useUserStore((state) => state.user)
@@ -19,7 +19,9 @@ export default function SideBar() {
   const [isSearch, setIsSearch] = useState(false)
   const [searchWord, setSearchWord] = useState("")
   const [chats, setChats] = useState<ChatTileType[] | null>(null)
+  const [isSearching, setIsSearching] = useState(false)
   const [searchResult, setSearchResult] = useState<UserTileProps[] | null>(null)
+  const searchDebounce = useDebounce(searchWord, 300)
 
   async function getUserChats() {
     try {
@@ -40,22 +42,29 @@ export default function SideBar() {
   useEffect(() => {
     async function getSeachUsers() {
       try {
-        const userQuery = query(collection(db, "users"), where("username", "==", searchWord))
+        const userQuery = query(
+          collection(db, "users"),
+          where("username", "==", searchWord),
+          where("userID", "!=", user.userID)
+        )
         await getDocs(userQuery).then((result) => {
           const data = result.docs.map((doc) => doc.data()) as UserTileProps[]
-          if (!result.empty) {
-            setSearchResult(data)
-          }
+          setSearchResult(data)
         })
-      } catch (error) {}
+      } catch (error) {
+        console.log(error)
+      } finally {
+        setIsSearching(false)
+      }
     }
 
-    if (searchWord.length) {
+    if (searchWord.length > 0) {
+      setIsSearching(true)
       getSeachUsers()
     } else {
       setSearchResult(null)
     }
-  }, [searchWord])
+  }, [searchDebounce])
 
   useEffect(() => {
     getUserChats()
@@ -92,7 +101,7 @@ export default function SideBar() {
           </div>
         </div>
         {isSearch ? (
-          <SearchList onClickTile={toggleSearchBar} users={searchResult} />
+          <SearchList isSearching={isSearching} onClickTile={toggleSearchBar} users={searchResult} />
         ) : chats ? (
           <ChatList chats={chats} />
         ) : (
@@ -129,14 +138,20 @@ function ChatList({ chats }: { chats: ChatTileType[] }) {
 function SearchList({
   users,
   onClickTile,
+  isSearching,
 }: {
   users: UserTileProps[] | null
   onClickTile: MouseEventHandler<HTMLAnchorElement>
+  isSearching: boolean
 }) {
   const location = useLocation()
   return (
     <>
-      {users ? (
+      {isSearching ? (
+        <div className="screen-center">
+          <Spinner size={"xl"} />
+        </div>
+      ) : users && users.length ? (
         <div>
           {users.map((user, idx) => {
             return (
