@@ -1,6 +1,7 @@
 import { MouseEventHandler } from "react"
 import { HiDotsHorizontal, HiSearch } from "react-icons/hi"
 import { Avatar, AvatarBadge, Button } from "@chakra-ui/react"
+import ChatSelectMenu from "./ ChatSelectMenu"
 
 type UserChatInfoProps = {
   avatar?: string | null
@@ -27,9 +28,7 @@ export default function UserChatInfo({ avatar, name, searchEvent }: UserChatInfo
           </Button>
         </div>
         <div>
-          <Button rounded={"3xl"} variant="ghost">
-            <HiDotsHorizontal />
-          </Button>
+          <ChatSelectMenu button={<HiDotsHorizontal />} />
         </div>
       </div>
     </div>
