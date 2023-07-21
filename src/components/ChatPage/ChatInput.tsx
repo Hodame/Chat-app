@@ -1,6 +1,6 @@
 import { Button } from "@chakra-ui/react"
 import { addDoc, collection, doc, setDoc } from "firebase/firestore"
-import { KeyboardEvent, MutableRefObject, useRef, useState } from "react"
+import { KeyboardEvent, useRef, useState } from "react"
 import { HiPaperAirplane, HiPaperClip } from "react-icons/hi"
 import { db } from "@/firebase/config"
 
@@ -9,7 +9,7 @@ import ResizeTextArea from "../UI/ResizeTextArea"
 
 type ChatInputProps = {
   reciver: User | null
-  messagesRef: React.MutableRefObject<HTMLDivElement | undefined>
+  messagesRef: React.MutableRefObject<HTMLDivElement | null>
 }
 
 export default function ChatInput({ reciver, messagesRef }: ChatInputProps) {
@@ -25,7 +25,6 @@ export default function ChatInput({ reciver, messagesRef }: ChatInputProps) {
 
     try {
       setIsLoading(true)
-      console.log(message)
 
       const userRef = collection(db, "chats", user.userID, "message", reciver.userID, "messages")
       const reviverRef = collection(db, "chats", reciver.userID, "message", user.userID, "messages")
@@ -52,8 +51,6 @@ export default function ChatInput({ reciver, messagesRef }: ChatInputProps) {
       textareaRef.current?.setAuto()
       setMessage("")
       setTimeout(() => {
-        console.log(messagesRef.current);
-        
         if (messagesRef.current) {
           messagesRef.current.scrollIntoView({ block: "end", behavior: "smooth" })
         }
