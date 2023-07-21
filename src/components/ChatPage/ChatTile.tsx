@@ -13,7 +13,7 @@ export default function ChatTile({ photoURL, username, sentAt, sentBy, message, 
       <Avatar name={username} size="lg" src={photoURL ?? undefined} />
       <div className=" mx-2 flex-auto">
         <h1 className="text-white font-medium">{username}</h1>
-        <p className="line-clamp-2 text-sm text-light">
+        <p className="line-clamp-2 break-all text-sm text-light">
           {sentBy.userID === user.userID ? (
             message
           ) : (
@@ -25,7 +25,7 @@ export default function ChatTile({ photoURL, username, sentAt, sentBy, message, 
         </p>
       </div>
       <div className="flex flex-col text-sm items-end">
-        <h1 className={"text-sm text-light"}>{dateFomrat(new Date(sentAt.seconds), "HH:HH")}</h1>
+        <h1 className={"text-sm text-light"}>{dateFomrat(new Date(sentAt.toDate()), "HH:HH")}</h1>
         {/* <MessageCount count={messageCount}/> */}
       </div>
     </div>
