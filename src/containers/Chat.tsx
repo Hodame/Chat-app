@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react"
 import { collection, doc, getDoc, onSnapshot } from "firebase/firestore"
 import { Message } from "@/types/chat"
 import { db } from "@/firebase/config"
+import { ReciverContext } from "@/context/ReciverContext"
 import useUserStore, { User } from "@/store/userStore"
 
 // либо говно без типов но зато подходит
@@ -71,35 +72,41 @@ export default function Chat() {
   )
 
   return (
-    <div className={"grid " + (isSearchBar ? "grid-cols-[1fr,0.5fr]" : "grid-cols-[1fr]")}>
-      {isLoading ? (
-        <div className="h-screen">
-          <div className="screen-center bg-background">
-            <Spinner size={"xl"} />
-          </div>
-        </div>
-      ) : (
-        <div
-          className={"flex flex-col h-screen bg-background " + (isSearchBar ? "rounded-tr-3xl rounded-br-3xl" : null)}
-        >
-          <div className="flex">
-            {reciver ? (
-              <UserChatInfo avatar={reciver?.photoURL} name={reciver.username} searchEvent={() => setSearchBar(true)} />
-            ) : null}
-          </div>
-          <div className="flex flex-col overflow-auto h-full">
-            <div className="flex-auto px-6 max-w-4xl m-auto w-full">
-              <MessagesList ref={messagesRef} messages={messages} reciver={reciver} />
+    <ReciverContext.Provider value={reciver ?? { username: "", email: "", userID: "", photoURL: null }}>
+      <div className={"grid " + (isSearchBar ? "grid-cols-[1fr,0.5fr]" : "grid-cols-[1fr]")}>
+        {isLoading ? (
+          <div className="h-screen">
+            <div className="screen-center bg-background">
+              <Spinner size={"xl"} />
             </div>
           </div>
-          <div>
-            <ChatInput messagesRef={messagesRef} reciver={reciver} />
+        ) : (
+          <div
+            className={"flex flex-col h-screen bg-background " + (isSearchBar ? "rounded-tr-3xl rounded-br-3xl" : null)}
+          >
+            <div className="flex">
+              {reciver ? (
+                <UserChatInfo
+                  avatar={reciver?.photoURL}
+                  name={reciver.username}
+                  searchEvent={() => setSearchBar(true)}
+                />
+              ) : null}
+            </div>
+            <div className="flex flex-col overflow-auto h-full">
+              <div className="flex-auto px-6 max-w-4xl m-auto w-full">
+                <MessagesList ref={messagesRef} messages={messages} reciver={reciver} />
+              </div>
+            </div>
+            <div>
+              <ChatInput messagesRef={messagesRef} reciver={reciver} />
+            </div>
           </div>
+        )}
+        <div className={isSearchBar ? "" : "translate-x-full hidden"}>
+          <SearchTab closeSearchBar={() => setSearchBar(false)} />
         </div>
-      )}
-      <div className={isSearchBar ? "" : "translate-x-full hidden"}>
-        <SearchTab closeSearchBar={() => setSearchBar(false)} />
       </div>
-    </div>
+    </ReciverContext.Provider>
   )
 }

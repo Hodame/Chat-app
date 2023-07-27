@@ -1,7 +1,7 @@
 import { MouseEventHandler } from "react"
 import { HiDotsHorizontal, HiSearch } from "react-icons/hi"
 import { Avatar, AvatarBadge, Button } from "@chakra-ui/react"
-import ChatSelectMenu from "./ ChatSelectMenu"
+import ChatSelectMenu from "./ChatSelectMenu"
 
 type UserChatInfoProps = {
   avatar?: string | null

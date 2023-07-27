@@ -9,7 +9,7 @@ import Register from "./Register"
 
 export default function Auth() {
   const { isLoggedIn, isCheckingStatus } = useAuthListener()
-  const [isLogin, setLogin] = useState(false)
+  const [isLogin, setLogin] = useState(true)
 
   return (
     <div>

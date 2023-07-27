@@ -9,7 +9,7 @@ const RoutesRouter = () => (
     <Routes>
       <Route path="/auth" element={<Auth />} />
       <Route path="/" element={<Main />}>
-        <Route path="/:chatID" element={<Chat />} />
+        <Route index path="/:chatID" element={<Chat />} />
       </Route>
     </Routes>
   </BrowserRouter>

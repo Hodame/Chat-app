@@ -29,6 +29,9 @@ export default function ChatInput({ reciver, messagesRef }: ChatInputProps) {
       const userRef = collection(db, "chats", user.userID, "message", reciver.userID, "messages")
       const reviverRef = collection(db, "chats", reciver.userID, "message", user.userID, "messages")
 
+      textareaRef.current?.setAuto()
+      setMessage("")
+
       await addDoc(userRef, {
         sentBy: {
           username: user.username,
@@ -48,8 +51,6 @@ export default function ChatInput({ reciver, messagesRef }: ChatInputProps) {
         message: message,
       })
 
-      textareaRef.current?.setAuto()
-      setMessage("")
       setTimeout(() => {
         if (messagesRef.current) {
           messagesRef.current.scrollIntoView({ block: "end", behavior: "smooth" })
