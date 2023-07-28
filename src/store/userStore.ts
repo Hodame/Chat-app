@@ -1,3 +1,4 @@
+import { Timestamp } from "firebase/firestore";
 import { create } from "zustand";
 
 export type User = {
@@ -5,6 +6,8 @@ export type User = {
   email: string
   userID: string
   photoURL: string | null
+  lastOnline: Timestamp | null
+  isOnline: boolean
 }
 
 type UserState = {
@@ -18,7 +21,8 @@ const useUserStore = create<UserState>()((set) => ({
     email: "",
     userID: "",
     photoURL: null,
-    chats: null
+    lastOnline: null,
+    isOnline: false
   },
   writeUser: (user) => set(() => ({ user: user }))
 }))
