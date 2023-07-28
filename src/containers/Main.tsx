@@ -1,15 +1,48 @@
-import { Navigate, Outlet, useLocation } from "react-router-dom"
+import { Link, Navigate, Outlet, useLocation } from "react-router-dom"
 
-import { useAuthListener } from "@/helpers/useFirebaseAuth"
+import { useAuthListener } from "@/hooks/useFirebaseAuth"
 import { Spinner } from "@chakra-ui/react"
 
 import SideBar from "../components/SideBar/SideBar"
 import { useEffect } from "react"
+import { doc, updateDoc } from "firebase/firestore"
+import useUserStore from "@/store/userStore"
+import { db } from "@/firebase/config"
 
 export default function Main() {
   const location = useLocation()
+  const user = useUserStore((state) => state.user)
   const { isLoggedIn, isCheckingStatus } = useAuthListener()
 
+  useEffect(() => {
+    if (isLoggedIn && user.userID.length > 0) {
+      updateDoc(doc(db, "users", user.userID), {
+        isOnline: true,
+        lastOnline: new Date()
+      })
+
+      document.addEventListener("visibilitychange", () => {
+        updateDoc(doc(db, "users", user.userID), {
+          isOnline: document.visibilityState === "visible",
+          lastOnline: new Date()
+        })
+      })
+
+      window.addEventListener("beforeunload", () => {
+        updateDoc(doc(db, "users", user.userID), {
+          isOnline: false,
+          lastOnline: new Date()
+        })
+      })
+
+      return () => {
+        updateDoc(doc(db, "users", user.userID), {
+          isOnline: false,
+          lastOnline: new Date()
+        })
+      }
+    }
+  }, [isLoggedIn])
   return (
     <>
       {isCheckingStatus ? (
@@ -17,7 +50,7 @@ export default function Main() {
           <Spinner size={"xl"} />
         </div>
       ) : isLoggedIn ? (
-        <div className="grid grid-cols-[450px,1fr] h-screen overflow-hidden">
+        <div className="grid grid-cols-[0.35fr,1fr] h-screen overflow-hidden">
           <div>
             <SideBar />
           </div>
