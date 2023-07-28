@@ -1,4 +1,4 @@
-import { useAuthListener } from "@/helpers/useFirebaseAuth"
+import { useAuthListener } from "@/hooks/useFirebaseAuth"
 import { Spinner } from "@chakra-ui/react"
 import { Navigate } from "react-router-dom"
 
