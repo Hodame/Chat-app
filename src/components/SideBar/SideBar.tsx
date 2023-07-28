@@ -11,7 +11,7 @@ import ChatTile from "@/components/ChatPage/ChatTile"
 import SideBarSelect from "./SideBarSelect"
 import useUserStore from "@/store/userStore"
 import UserTile, { UserTileProps } from "./UserTile"
-import useDebounce from "@/helpers/userDebounce"
+import useDebounce from "@/hooks/userDebounce"
 
 export default function SideBar() {
   const user = useUserStore((state) => state.user)
@@ -30,6 +30,8 @@ export default function SideBar() {
         const data = snapshot.docs.map((doc) => doc.data()) as ChatTileType[]
         if (!snapshot.empty) {
           setChats(data)
+        } else {
+          setChats(null)
         }
       })
     } catch (error) {
@@ -44,12 +46,13 @@ export default function SideBar() {
       try {
         const userQuery = query(
           collection(db, "users"),
-          where("username", "==", searchWord),
-          where("userID", "!=", user.userID)
+          where("username", ">=", searchWord),
+          where("username", "<=", searchWord + "\uf8ff")
         )
         await getDocs(userQuery).then((result) => {
           const data = result.docs.map((doc) => doc.data()) as UserTileProps[]
-          setSearchResult(data)
+
+          setSearchResult(data.filter((search) => search.userID !== user.userID))
         })
       } catch (error) {
         console.log(error)
