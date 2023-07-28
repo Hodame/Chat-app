@@ -54,6 +54,7 @@ const components = {
         }
       },
       list: {
+        zIndex: 1000,
         borderRadius: '3xl',
         p: '2',
         bg: 'backgroundBlur',
