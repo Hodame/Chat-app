@@ -9,23 +9,19 @@ import ResizeTextArea from "../UI/ResizeTextArea"
 
 type ChatInputProps = {
   reciver: User | null
-  messagesRef: React.MutableRefObject<HTMLDivElement | null>
 }
 
-export default function ChatInput({ reciver, messagesRef }: ChatInputProps) {
+export default function ChatInput({ reciver }: ChatInputProps) {
   const user = useUserStore((state) => state.user)
   const textareaRef = useRef<{ setAuto: () => void }>()
 
   const [message, setMessage] = useState("")
-  const [isLoading, setIsLoading] = useState(false)
 
   async function sendMessage() {
     if (!reciver) return
     if (!message.trim().length) return
 
     try {
-      setIsLoading(true)
-
       const userRef = collection(db, "chats", user.userID, "message", reciver.userID, "messages")
       const reviverRef = collection(db, "chats", reciver.userID, "message", user.userID, "messages")
 
@@ -50,12 +46,6 @@ export default function ChatInput({ reciver, messagesRef }: ChatInputProps) {
         sentAt: new Date(),
         message: message,
       })
-
-      setTimeout(() => {
-        if (messagesRef.current) {
-          messagesRef.current.scrollIntoView({ block: "end", behavior: "smooth" })
-        }
-      }, 1)
 
       const updateRef = doc(db, "chats", user.userID, "chat", reciver.userID)
       const updateReciverRef = doc(db, "chats", reciver.userID, "chat", user.userID)
@@ -84,9 +74,7 @@ export default function ChatInput({ reciver, messagesRef }: ChatInputProps) {
         },
       })
     } catch (error) {
-      alert(error)
-    } finally {
-      setIsLoading(false)
+      console.log(error)
     }
   }
 
@@ -117,7 +105,7 @@ export default function ChatInput({ reciver, messagesRef }: ChatInputProps) {
         />
       </div>
       <div className="rotate-90 h-full">
-        <Button isLoading={isLoading} onClick={sendMessage} h={12} w={"100%"} rounded={"3xl"} variant={"solid"}>
+        <Button onClick={sendMessage} h={12} w={"100%"} rounded={"3xl"} variant={"solid"}>
           <HiPaperAirplane />
         </Button>
       </div>
