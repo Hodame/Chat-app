@@ -4,7 +4,7 @@ import { auth, db } from "@/firebase/config"
 import { doc, getDoc } from "firebase/firestore";
 import useUserStore, { User } from "@/store/userStore";
 
-export const useAuthListener = () => {
+function authListener() {
   const [isLoggedIn, setLoggedIn] = useState(false);
   const [isCheckingStatus, setCheckingStatus] = useState(true);
 
@@ -24,6 +24,8 @@ export const useAuthListener = () => {
             userID: "",
             email: "",
             photoURL: null,
+            lastOnline: null,
+            isOnline: false
           })
         })
       } catch (error) {
@@ -41,6 +43,8 @@ export const useAuthListener = () => {
       userID: "",
       email: "",
       photoURL: null,
+      lastOnline: null,
+      isOnline: false
     })
   }
 
@@ -58,3 +62,5 @@ export const useAuthListener = () => {
 
   return { isLoggedIn, isCheckingStatus };
 };
+
+export const useAuthListener = authListener
